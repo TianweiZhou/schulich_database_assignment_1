@@ -44,20 +44,37 @@ ORDER BY total_quantity_sold DESC;
 
 -- Q4
 -- Identify the two-hour window (e.g., 14:00–16:00) in which the highest total quantity of items were sold, across all dates in the dataset.
+SELECT DISTINCT sale_time AS shop_time,
+                COUNT(sale_time) AS count
+FROM assignment01.bakery_sales
+GROUP BY sale_time
+ORDER BY sale_time ASC;
+-- After analyze transaction time and frequencies to estimate the bakery's shop hours (7-20)
 WITH hourly_sales AS (
-    SELECT DATE_PART('hour', sale_datetime) AS sale_hour,
+    SELECT (
+        CASE
+            WHEN DATE_PART('hour', sale_datetime) > 20 THEN 20 - 1 -- Adjusting last minute sales to previous time window
+            ELSE DATE_PART('hour', sale_datetime)
+        END
+        ) AS sale_hour,
            SUM(quantity) AS total_quantity,
            SUM(quantity * unit_price) AS total_revenue
     FROM assignment01.bakery_sales
-    GROUP BY DATE_PART('hour', sale_datetime)
+    GROUP BY (
+        CASE
+            WHEN DATE_PART('hour', sale_datetime) > 20 THEN 20 - 1
+            ELSE DATE_PART('hour', sale_datetime)
+        END
+        )
 )
 SELECT t1.sale_hour AS time_window_start,
        t1.sale_hour + 2 AS time_window_end,
     SUM(t2.total_quantity) AS total_quantity_sold,
     SUM(t2.total_revenue) AS total_revenue
 FROM hourly_sales t1
-JOIN hourly_sales t2 ON t2.sale_hour = t1.sale_hour
-                            OR t2.sale_hour = t1.sale_hour + 1
+JOIN hourly_sales t2
+    ON t2.sale_hour = t1.sale_hour
+    OR t2.sale_hour = t1.sale_hour + 1
 GROUP BY t1.sale_hour
 ORDER BY total_quantity_sold DESC
 LIMIT 1;
