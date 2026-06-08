@@ -10,7 +10,7 @@ WITH rank_table AS (
             PARTITION BY TO_CHAR(sale_date, 'YYYY-MM')
             ORDER BY SUM(quantity) DESC) AS rank
     FROM assignment01.bakery_sales
-    GROUP BY sale_date, article
+    GROUP BY TO_CHAR(sale_date, 'YYYY-MM'), article
 )
 SELECT year_month,
        item_name,
