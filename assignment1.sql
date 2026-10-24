@@ -1,5 +1,6 @@
 -- Q1
 -- Write a query that reports the top 3 items with the highest total quantity sold for each year-month in the dataset.
+'''this is the v1'''
 WITH rank_table AS (
     SELECT TO_CHAR(sale_date, 'YYYY-MM') AS year_month, -- Year and month
         article AS item_name, -- Item name
